@@ -1,0 +1,36 @@
+TITLE: Estimation of multimorbidity trajectories using LCGA model with 3 trajectories, Poisson distribution;
+
+DATA: FILE = data.txt;
+
+VARIABLE: NAMES = ID S1-S10 ; USEVAR = S1-S10; COUNT IS S1-S10;
+          CLASSES = c(3); MISSING ARE ALL (-99); 
+ANALYSIS: TYPE = MIXTURE; STARTS = 20 5; ESTIMATOR = MLR; 
+          LRTBOOTSTRAP = 100; ALGORITHM = INTEGRATION;
+          K-1START = 20 5;
+SAVEDATA: save=cprob; file=output3.txt; 
+
+MODEL:
+
+%OVERALL%
+! model intercept, linear slope
+i s | S1@1 S2@2 S3@3 S4@4 S5@5 S6@6 S7@7 S8@8 S9@9 S10@10;
+
+!Variance of random effects i and s fixed to zero
+i-s@0; 
+
+! Means of manifest variables
+[S1-S10@0];  
+
+!Estimate I S MEANS separately for each trajectory
+! Class-specific components
+%c#1%
+[i s];
+%c#2%
+[i s];
+%c#3%
+[i s];
+
+OUTPUT: TECH11; 
+
+PLOT: SERIES=S1-S10 (s);
+TYPE=PLOT3;
